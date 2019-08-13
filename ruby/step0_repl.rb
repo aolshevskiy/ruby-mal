@@ -1,26 +1,15 @@
-def mal_read(input)
-  input
-end
+require_relative 'setup'
+require 'mal'
 
-def mal_eval(input)
-  output = input
+class DumbMainLoop < Mal::MainLoop
+  protected
+  def read(input)
+    input
+  end
 
-  output
-end
-
-def mal_print(output)
-  output
-end
-
-def rep(input)
-  mal_print(mal_eval(mal_read(input)))
-end
-
-if $PROGRAM_NAME == __FILE__
-  loop do
-    print 'user> '
-    line = gets
-    break if line.nil?
-    puts rep(line)
+  def print(output)
+    output
   end
 end
+
+DumbMainLoop.new.loop
