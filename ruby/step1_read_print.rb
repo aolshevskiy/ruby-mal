@@ -1,4 +1,14 @@
 require_relative 'setup'
-require 'mal'
 
-Mal::MainLoop.new.loop
+class ReadPrintMainLoop < Mal::MainLoop
+
+  protected
+
+  def eval(forms)
+    forms
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+  ReadPrintMainLoop.new.loop
+end

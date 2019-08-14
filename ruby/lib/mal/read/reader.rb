@@ -2,13 +2,12 @@ class Mal::Read::Reader
   include Mal
 
   def initialize(tokens)
-    STDERR.puts "tokens: #{tokens.map(&:to_s).join(', ')}" if $DEBUG
     @tokens = tokens
     @position = 0
   end
 
   def read_form
-    token = self.peek
+    token = peek
 
     raise ArgumentError, "unbalanced token" if token.nil?
 
@@ -39,87 +38,87 @@ class Mal::Read::Reader
   private
 
   def read_list
-    self.next
+    next_token
     list = Types::List.new
 
     loop do
-      break if self.peek == ')'
+      break if peek == ')'
       form = read_form
       list << form
     end
 
-    self.next
+    next_token
     list
   end
 
   def read_vector
-    self.next
+    next_token
     vector = Types::Vector.new
 
     loop do
-      break if self.peek == ']'
+      break if peek == ']'
       form = read_form
       vector << form
     end
 
-    self.next
+    next_token
     vector
   end
 
   def read_hash_map
-    self.next
+    next_token
     hash_map = {}
 
     loop do
-      break if self.peek == '}'
+      break if peek == '}'
       key = read_form
       value = read_form
       hash_map[key] = value
     end
 
-    self.next
+    next_token
     hash_map
   end
 
   def read_quote
-    self.next
+    next_token
     quoted_form = read_form
     Types::Quote.new(quoted_form)
   end
 
   def read_quasiquote
-    self.next
+    next_token
     quoted_form = read_form
     Types::Quasiquote.new(quoted_form)
   end
 
   def read_unquote
-    self.next
+    next_token
     unquoted_form = read_form
     Types::Unquote.new(unquoted_form)
   end
 
   def read_splice_unquote
-    self.next
+    next_token
     unquoted_form = read_form
     Types::SpliceUnquote.new(unquoted_form)
   end
 
   def read_deref
-    self.next
+    next_token
     dereffed_form = read_form
     Types::Deref.new(dereffed_form)
   end
 
   def read_metadata
-    self.next
+    next_token
     metadata = read_form
     marked_form = read_form
     Types::Metadata.new(marked_form, metadata)
   end
 
   def read_atom
-    token = self.next
+    token = next_token
     case
       when token == 'nil'
         nil
@@ -154,8 +153,8 @@ class Mal::Read::Reader
     true
   end
 
-  def next
-    token = self.peek
+  def next_token
+    token = peek
     @position += 1
     token
   end

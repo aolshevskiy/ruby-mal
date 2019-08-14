@@ -1,8 +1,11 @@
 class Mal::MainLoop
   include Mal
 
-  PROMPT = 'user> '
+  def initialize(evaluator = Evaluator.new)
+    @evaluator = evaluator
+  end
 
+  PROMPT = 'user> '
   def loop
     Readline.mal_readline(PROMPT) do |line|
       puts rep(line)
@@ -17,14 +20,12 @@ class Mal::MainLoop
     Read::Driver.read_str(raw_input)
   end
 
-  def eval(input)
-    output = input
-
-    output
+  def eval(ast)
+    @evaluator.eval(ast)
   end
 
-  def print(form)
-    Printer.pr_str(form)
+  def print(ast)
+    Printer.pr_str(ast)
   end
 
   def rep(input)

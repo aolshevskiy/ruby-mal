@@ -1,8 +1,10 @@
 require_relative 'setup'
-require 'mal'
+require_relative 'step1_read_print'
 
-class DumbMainLoop < Mal::MainLoop
+class DumbMainLoop < ReadPrintMainLoop
+
   protected
+
   def read(input)
     input
   end
@@ -12,4 +14,6 @@ class DumbMainLoop < Mal::MainLoop
   end
 end
 
-DumbMainLoop.new.loop
+if $PROGRAM_NAME == __FILE__
+  DumbMainLoop.new.loop
+end

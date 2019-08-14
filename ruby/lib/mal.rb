@@ -5,6 +5,9 @@ module Mal
   module Types; end
   module Read; end
 
+  require 'mal/env'
+  require 'mal/special_forms'
+  require 'mal/evaluator'
   require 'mal/main_loop'
   require 'mal/printer'
   require 'mal/readline'
