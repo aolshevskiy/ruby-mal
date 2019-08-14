@@ -1,5 +1,5 @@
 class Mal::Evaluator
-  include Mal, Mal::SpecialForms
+  include Mal
 
   def initialize(env = TopLevelEnv.new)
     @env = env
@@ -22,22 +22,25 @@ class Mal::Evaluator
     @env
   end
 
-  def with_nested_env
-    @env = Env.new(@env)
+  def with_env(other_env)
+    old_env = @env
+    @env = other_env
     result = yield
-    @env = @env.outer
+    @env = old_env
     result
   end
 
-  private
+  def with_nested_env
+    new_env = Env.new(@env)
+
+    with_env(new_env) do
+      yield
+    end
+  end
 
   def apply(ast)
-    if special_form?(*ast)
-      apply_special_form(*ast)
-    else
-      op, *args = eval_ast(ast)
-      op.call(*args)
-    end
+    op, *args = eval_ast(ast)
+    op.call(*args)
   end
 
   def eval_ast(ast)
@@ -45,11 +48,9 @@ class Mal::Evaluator
       when Types::Symbol
         @env.get(ast.name)
       when Types::List
-        new_list = Types::List.new
-        new_list.concat ast.map(&method(:eval))
+        Types::List[*ast.map(&method(:eval))]
       when Types::Vector
-        new_vector = Types::Vector.new
-        new_vector.concat ast.map(&method(:eval))
+        Types::Vector[*ast.map(&method(:eval))]
       when Hash
         ast.map {|k, v| [k, eval(v)]}.to_h
       else

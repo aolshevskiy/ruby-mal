@@ -1,12 +1,14 @@
 class Mal::MainLoop
   include Mal
 
-  def initialize(evaluator = Evaluator.new)
+  def initialize(evaluator = SpecialFormsEvaluator.new)
     @evaluator = evaluator
   end
 
   PROMPT = 'user> '
   def loop
+    init
+
     Readline.mal_readline(PROMPT) do |line|
       puts rep(line)
     rescue StandardError => e
@@ -25,11 +27,19 @@ class Mal::MainLoop
   end
 
   def print(ast)
-    Printer.pr_str(ast)
+    Printer.pr_str(ast, true)
   end
 
   def rep(input)
     print(eval(read(input)))
   end
 
+  private
+  def init
+    mal_dir = File.join(File.dirname(__FILE__), '..')
+    init_script_path = File.join(mal_dir, 'init.mal')
+    init_script = File.read(init_script_path)
+
+    rep(init_script.strip)
+  end
 end

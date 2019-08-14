@@ -128,7 +128,7 @@ class Mal::Read::Reader
         false
       when token[0] == '"'
         raise ArgumentError, 'unbalanced string' unless valid_string?(token)
-        token[1..-2]
+        read_string(token[1..-2])
       when token =~ /^-?\d+$/
         Integer(token)
       when token[0] == ':'
@@ -137,6 +137,19 @@ class Mal::Read::Reader
         Types::Symbol.new(token)
       else
         raise ArgumentError, "unknown atom: #{token}"
+    end
+  end
+
+  def read_string(unquoted)
+    unquoted.gsub(/\\(["\\n])/) do |match|
+      case match[1]
+        when '"'
+          '"'
+        when '\\'
+          '\\'
+        when 'n'
+          "\n"
+      end
     end
   end
 

@@ -2,15 +2,18 @@ require 'readline'
 
 module Mal
 
+  module Core; end
   module Types; end
   module Read; end
 
   require 'mal/env'
-  require 'mal/special_forms'
   require 'mal/evaluator'
   require 'mal/main_loop'
   require 'mal/printer'
   require 'mal/readline'
+  require 'mal/special_forms_evaluator'
+
+  require 'mal/core/ns'
 
   require 'mal/read/driver'
   require 'mal/read/reader'
