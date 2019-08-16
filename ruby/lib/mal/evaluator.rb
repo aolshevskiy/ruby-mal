@@ -10,6 +10,7 @@ class Mal::Evaluator
   end
 
   def eval(ast, env)
+
     if !ast.is_a?(Types::List)
       return eval_ast(ast, env)
     end
@@ -18,60 +19,60 @@ class Mal::Evaluator
     end
 
     first, *rest = ast
+    first_name = first.is_a?(Types::Symbol) ? first.name : nil
 
-    if first.is_a?(Types::Symbol)
-      case first.name
-        when 'def!'
-          key, value = rest
-          return env.set!(key.name, eval(value, env))
+    case first_name
+      when 'def!'
+        key, value = rest
+        return env.set!(key.name, eval(value, env))
 
-        when 'let*'
-          let_env = Env.new(env)
-          bindings, result_expr = rest
-          bindings.each_slice(2) do |key, value|
-            let_env.set!(key.name, eval(value, let_env))
-          end
+      when 'let*'
+        let_env = Env.new(env)
+        bindings, result_expr = rest
+        bindings.each_slice(2) do |key, value|
+          let_env.set!(key.name, eval(value, let_env))
+        end
 
-          return eval(result_expr, let_env)
+        return eval(result_expr, let_env)
 
-        when 'do'
-          result = nil
-          rest.each do |e|
-            result = eval(e, env)
-          end
-          return result
+      when 'do'
+        result = nil
+        rest.each do |e|
+          result = eval(e, env)
+        end
+        return result
 
-        when 'if'
-          condition, truthy, falsy = rest
+      when 'if'
+        condition, truthy, falsy = rest
 
-          cond_result = eval(condition, env)
+        cond_result = eval(condition, env)
 
-          result = if !cond_result.nil? && cond_result != false
-            eval(truthy, env)
-          elsif not falsy.nil?
-            eval(falsy, env)
-          else
-            nil
-          end
+        result = if !cond_result.nil? && cond_result != false
+          eval(truthy, env)
+        elsif not falsy.nil?
+          eval(falsy, env)
+        else
+          nil
+        end
 
-          return result
+        return result
 
-        when 'fn*'
-          binds, body = rest
-          result = Proc.new do |*exprs|
-            fn_env = Env.new(env, binds, exprs)
-            eval(body, fn_env)
-          end
+      when 'fn*'
+        binds, body = rest
+        result = Proc.new do |*exprs|
+          fn_env = Env.new(env, binds, exprs)
+          eval(body, fn_env)
+        end
 
-          return result
-      end
+        return result
+
+      else
+        op, *args = eval_ast(ast, env)
+        return op.call(*args)
     end
-
-    op, *args = eval_ast(ast, env)
-    op.call(*args)
   end
 
-  protected
+  private
 
   def eval_ast(ast, env)
     case ast
