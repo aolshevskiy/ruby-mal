@@ -7,12 +7,12 @@ class Mal::Evaluator
 
   def eval(ast)
     case
+      when !ast.is_a?(Types::List)
+        return eval_ast(ast)
       when ast.is_a?(Types::List) && ast.empty?
-        ast
-      when ast.is_a?(Types::List)
-        apply(ast)
+        return ast
       else
-        eval_ast(ast)
+        apply(ast)
     end
   end
 
@@ -52,7 +52,7 @@ class Mal::Evaluator
       when Types::Vector
         Types::Vector[*ast.map(&method(:eval))]
       when Hash
-        ast.map {|k, v| [k, eval(v)]}.to_h
+        ast.map { |k, v| [k, eval(v)] }.to_h
       else
         ast
     end

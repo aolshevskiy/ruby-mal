@@ -24,6 +24,7 @@ class Mal::SpecialFormsEvaluator < Mal::Evaluator
       bindings.each_slice(2) do |key, value|
         env.set!(key.name, eval(value))
       end
+
       eval(result_expr)
     end
   end

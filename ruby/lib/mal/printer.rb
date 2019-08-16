@@ -1,39 +1,47 @@
-module Mal::Printer
+class Mal::Printer
   include Mal
 
+  def initialize(print_readably)
+    @print_readably = print_readably
+  end
+  
   def self.pr_str(ast, print_readably = false)
+    Printer.new(print_readably).do_pr_str(ast)
+  end
+
+  def do_pr_str(ast)
     case ast
       when nil
         'nil'
       when true, false, Integer
         ast.to_s
       when String
-        print_string(ast, print_readably)
+        print_string(ast)
       when Types::List
-        spaced_list = ast.map {|e| pr_str(e, print_readably)}.join(' ')
+        spaced_list = ast.map {|e| do_pr_str(e)}.join(' ')
         "(#{spaced_list})"
       when Types::Vector
-        spaced_vector = ast.map {|e| pr_str(e, print_readably)}.join(' ')
+        spaced_vector = ast.map {|e| do_pr_str(e)}.join(' ')
         "[#{spaced_vector}]"
       when Symbol
         ":#{ast.to_s}"
       when Hash
-        spaced_hash_map = ast.entries.flatten.map {|e| pr_str(e, print_readably)}.join(' ')
+        spaced_hash_map = ast.entries.flatten.map {|e| do_pr_str(e)}.join(' ')
         "{#{spaced_hash_map}}"
       when Types::Symbol
         ast.name
       when Types::Quote
-        "(quote #{pr_str(ast.quoted, print_readably)})"
+        "(quote #{do_pr_str(ast.quoted)})"
       when Types::Quasiquote
-        "(quasiquote #{pr_str(ast.quoted, print_readably)})"
+        "(quasiquote #{do_pr_str(ast.quoted)})"
       when Types::Unquote
-        "(unquote #{pr_str(ast.unquoted, print_readably)})"
+        "(unquote #{do_pr_str(ast.unquoted)})"
       when Types::SpliceUnquote
-        "(splice-unquote #{pr_str(ast.unquoted, print_readably)})"
+        "(splice-unquote #{do_pr_str(ast.unquoted)})"
       when Types::Deref
-        "(deref #{pr_str(ast.dereffed, print_readably)})"
+        "(deref #{do_pr_str(ast.dereffed)})"
       when Types::Metadata
-        "(with-meta #{pr_str(ast.marked, print_readably)} #{pr_str(ast.metadata, print_readably)})"
+        "(with-meta #{do_pr_str(ast.marked)} #{do_pr_str(ast.metadata)})"
       when Proc
         "#<function>"
       else
@@ -42,8 +50,8 @@ module Mal::Printer
   end
 
   private
-  def self.print_string(str, print_readably)
-    if print_readably
+  def print_string(str)
+    if @print_readably
       contents = str.gsub(/["\\\n]/) do |match|
         case match
           when '"'
