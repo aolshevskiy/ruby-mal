@@ -1,7 +1,7 @@
 class Mal::MainLoop
   include Mal
 
-  def initialize(evaluator = SpecialFormsEvaluator.new)
+  def initialize(evaluator = Evaluator.new)
     @evaluator = evaluator
   end
 
@@ -23,7 +23,7 @@ class Mal::MainLoop
   end
 
   def eval(ast)
-    @evaluator.eval(ast)
+    @evaluator.top_eval(ast)
   end
 
   def print(ast)

@@ -11,7 +11,6 @@ module Mal
   require 'mal/main_loop'
   require 'mal/printer'
   require 'mal/readline'
-  require 'mal/special_forms_evaluator'
 
   require 'mal/core/ns'
 

@@ -1,58 +1,88 @@
 class Mal::Evaluator
   include Mal
 
-  def initialize(env = TopLevelEnv.new)
-    @env = env
+  def initialize
+    @top_level = TopLevelEnv.new
   end
 
-  def eval(ast)
-    case
-      when !ast.is_a?(Types::List)
-        return eval_ast(ast)
-      when ast.is_a?(Types::List) && ast.empty?
-        return ast
-      else
-        apply(ast)
+  def top_eval(ast)
+    eval(ast, @top_level)
+  end
+
+  def eval(ast, env)
+    if !ast.is_a?(Types::List)
+      return eval_ast(ast, env)
     end
+    if ast.is_a?(Types::List) && ast.empty?
+      return ast
+    end
+
+    first, *rest = ast
+
+    if first.is_a?(Types::Symbol)
+      case first.name
+        when 'def!'
+          key, value = rest
+          return env.set!(key.name, eval(value, env))
+
+        when 'let*'
+          let_env = Env.new(env)
+          bindings, result_expr = rest
+          bindings.each_slice(2) do |key, value|
+            let_env.set!(key.name, eval(value, let_env))
+          end
+
+          return eval(result_expr, let_env)
+
+        when 'do'
+          result = nil
+          rest.each do |e|
+            result = eval(e, env)
+          end
+          return result
+
+        when 'if'
+          condition, truthy, falsy = rest
+
+          cond_result = eval(condition, env)
+
+          result = if !cond_result.nil? && cond_result != false
+            eval(truthy, env)
+          elsif not falsy.nil?
+            eval(falsy, env)
+          else
+            nil
+          end
+
+          return result
+
+        when 'fn*'
+          binds, body = rest
+          result = Proc.new do |*exprs|
+            fn_env = Env.new(env, binds, exprs)
+            eval(body, fn_env)
+          end
+
+          return result
+      end
+    end
+
+    op, *args = eval_ast(ast, env)
+    op.call(*args)
   end
 
   protected
 
-  def env
-    @env
-  end
-
-  def with_env(other_env)
-    old_env = @env
-    @env = other_env
-    result = yield
-    @env = old_env
-    result
-  end
-
-  def with_nested_env
-    new_env = Env.new(@env)
-
-    with_env(new_env) do
-      yield
-    end
-  end
-
-  def apply(ast)
-    op, *args = eval_ast(ast)
-    op.call(*args)
-  end
-
-  def eval_ast(ast)
+  def eval_ast(ast, env)
     case ast
       when Types::Symbol
-        @env.get(ast.name)
+        env.get(ast.name)
       when Types::List
-        Types::List[*ast.map(&method(:eval))]
+        Types::List[*ast.map { |f| eval(f, env) }]
       when Types::Vector
-        Types::Vector[*ast.map(&method(:eval))]
+        Types::Vector[*ast.map { |f| eval(f, env) }]
       when Hash
-        ast.map { |k, v| [k, eval(v)] }.to_h
+        ast.map { |k, v| [k, eval(v, env)] }.to_h
       else
         ast
     end
