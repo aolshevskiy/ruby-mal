@@ -134,4 +134,14 @@ module Mal::Core::NS
     fn = fn.fn if fn.is_a?(Types::Function)
     atom.value = fn.call(atom.value, *fns)
   end
+
+  symbol 'cons', :cons
+  def self.cons(e, list)
+    Types::List[e, *list]
+  end
+
+  symbol 'concat', :concat
+  def self.concat(*lists)
+    Types::List[*lists.flatten(1)]
+  end
 end

@@ -1,8 +1,13 @@
-class Mal::Types::Unquote
+module Mal
+  class Types::Unquote < Types::List
 
-  def initialize(unquoted)
-    @unquoted = unquoted
+    def initialize(unquoted)
+      self << Types::Symbol['unquote']
+      self << unquoted
+    end
+
+    def self.[](unquoted)
+      self.new(unquoted)
+    end
   end
-
-  attr_reader :unquoted
 end

@@ -1,9 +1,14 @@
-class Mal::Types::Quote
+module Mal
+  class Types::Quote < Types::List
 
-  def initialize(quoted)
-    @quoted = quoted
+    def initialize(quoted)
+      self << Types::Symbol['quote']
+      self << quoted
+    end
+
+    def self.[](quoted)
+      self.new(quoted)
+    end
   end
-
-  attr_reader :quoted
 end
 

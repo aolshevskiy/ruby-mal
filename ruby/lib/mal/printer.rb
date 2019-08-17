@@ -30,14 +30,6 @@ class Mal::Printer
         "{#{spaced_hash_map}}"
       when Types::Symbol
         ast.name
-      when Types::Quote
-        "(quote #{do_pr_str(ast.quoted)})"
-      when Types::Quasiquote
-        "(quasiquote #{do_pr_str(ast.quoted)})"
-      when Types::Unquote
-        "(unquote #{do_pr_str(ast.unquoted)})"
-      when Types::SpliceUnquote
-        "(splice-unquote #{do_pr_str(ast.unquoted)})"
       when Types::Metadata
         "(with-meta #{do_pr_str(ast.marked)} #{do_pr_str(ast.metadata)})"
       when Method, Types::Function

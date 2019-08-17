@@ -27,4 +27,5 @@ module Mal
   require 'mal/types/metadata'
   require 'mal/types/function'
   require 'mal/types/atom'
+  require 'mal/types/deref'
 end

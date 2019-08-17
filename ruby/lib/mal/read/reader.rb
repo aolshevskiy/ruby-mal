@@ -83,31 +83,31 @@ class Mal::Read::Reader
   def read_quote
     next_token
     quoted_form = read_form
-    Types::Quote.new(quoted_form)
+    Types::Quote[quoted_form]
   end
 
   def read_quasiquote
     next_token
     quoted_form = read_form
-    Types::Quasiquote.new(quoted_form)
+    Types::Quasiquote[quoted_form]
   end
 
   def read_unquote
     next_token
     unquoted_form = read_form
-    Types::Unquote.new(unquoted_form)
+    Types::Unquote[unquoted_form]
   end
 
   def read_splice_unquote
     next_token
     unquoted_form = read_form
-    Types::SpliceUnquote.new(unquoted_form)
+    Types::SpliceUnquote[unquoted_form]
   end
 
   def read_deref
     next_token
     dereffed_form = read_form
-    Types::List[Types::Symbol.new('deref'), dereffed_form]
+    Types::Deref[dereffed_form]
   end
 
   def read_metadata
@@ -134,7 +134,7 @@ class Mal::Read::Reader
       when token[0] == ':'
         token[1..-1].to_sym
       when token =~ /^[^\s()\[\]{}",'`;#|\\]+$/
-        Types::Symbol.new(token)
+        Types::Symbol[token]
       else
         raise ArgumentError, "unknown atom: #{token}"
     end

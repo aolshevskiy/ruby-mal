@@ -70,6 +70,12 @@ class Mal::Evaluator
 
           return Types::Function.new(body, params, env, func)
 
+        when 'quote'
+          return rest[0]
+
+        when 'quasiquote'
+          ast = quasiquote(rest[0])
+
         else
           f, *args = eval_ast(ast, env)
           case f
@@ -79,13 +85,33 @@ class Mal::Evaluator
             else
               return f.call(*args)
           end
-
-
       end
     end
   end
 
   private
+
+  def quasiquote(ast)
+    if !pair?(ast)
+      Types::Quote[ast]
+    elsif ast[0].is_a?(Types::Symbol) && ast[0].name == 'unquote'
+      ast[1]
+    elsif pair?(ast[0]) && ast[0][0].is_a?(Types::Symbol) && ast[0][0].name == 'splice-unquote'
+      Types::List[
+        Types::Symbol['concat'],
+        ast[0][1],
+        quasiquote(Types::List[*ast[1..-1]])]
+    else
+      Types::List[
+        Types::Symbol['cons'],
+        quasiquote(ast[0]),
+        quasiquote(Types::List[*ast[1..-1]])]
+    end
+  end
+
+  def pair?(ast)
+    (ast.is_a?(Types::List) || ast.is_a?(Types::Vector)) && !ast.empty?
+  end
 
   def eval_ast(ast, env)
     case ast
