@@ -29,7 +29,7 @@ class Mal::Read::Reader
       when token == '@'
         read_deref
       when token == '^'
-        read_metadata
+        read_with_meta
       else
         read_atom
     end
@@ -67,7 +67,7 @@ class Mal::Read::Reader
 
   def read_hash_map
     next_token
-    hash_map = {}
+    hash_map = Types::HashMap.new
 
     loop do
       break if peek == '}'
@@ -110,11 +110,11 @@ class Mal::Read::Reader
     Types::Deref[dereffed_form]
   end
 
-  def read_metadata
+  def read_with_meta
     next_token
-    metadata = read_form
+    meta = read_form
     marked_form = read_form
-    Types::Metadata.new(marked_form, metadata)
+    Types::WithMeta[marked_form, meta]
   end
 
   def read_atom

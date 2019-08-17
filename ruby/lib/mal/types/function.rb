@@ -6,13 +6,12 @@ module Mal::Types
       @env = env
       @fn = fn
       @macro = false
+      @meta = nil
     end
 
     attr_reader :ast, :params, :env, :fn
-
-    def macro=(macro)
-      @macro = macro
-    end
+    attr_accessor :meta
+    attr_writer :macro
 
     def macro?
       @macro

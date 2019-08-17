@@ -30,9 +30,7 @@ class Mal::Printer
         "{#{spaced_hash_map}}"
       when Types::Symbol
         ast.name
-      when Types::Metadata
-        "(with-meta #{do_pr_str(ast.marked)} #{do_pr_str(ast.metadata)})"
-      when Method, Types::Function
+      when Types::NativeFunction, Types::Function
         "#<function>"
       when Types::Atom
         "(atom #{ast.value})"

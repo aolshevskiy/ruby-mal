@@ -29,9 +29,11 @@ module Mal
   require 'mal/types/quasiquote'
   require 'mal/types/unquote'
   require 'mal/types/splice_unquote'
-  require 'mal/types/metadata'
+  require 'mal/types/with_meta'
   require 'mal/types/function'
   require 'mal/types/atom'
   require 'mal/types/deref'
   require 'mal/types/exception'
+  require 'mal/types/hash_map'
+  require 'mal/types/native_function'
 end

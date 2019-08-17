@@ -44,7 +44,10 @@ class Mal::Evaluator
         when 'defmacro!'
           key, value = rest
           evaled_value = eval(value, env)
-          evaled_value.macro = true if evaled_value.is_a?(Types::Function)
+          if evaled_value.is_a?(Types::Function)
+            evaled_value = evaled_value.dup
+            evaled_value.macro = true
+          end
           return env.set!(key.name, evaled_value)
 
         when 'let*'
@@ -168,11 +171,11 @@ class Mal::Evaluator
       when Types::Symbol
         env.get(ast.name)
       when Types::List
-        Types::List[*ast.map { |f| eval(f, env) }]
+        Types::List[*ast.map {|f| eval(f, env)}]
       when Types::Vector
-        Types::Vector[*ast.map { |f| eval(f, env) }]
+        Types::Vector[*ast.map {|f| eval(f, env)}]
       when Hash
-        ast.map { |k, v| [k, eval(v, env)] }.to_h
+        Types::HashMap[ast.map {|k, v| [k, eval(v, env)]}]
       else
         ast
     end

@@ -8,7 +8,7 @@ module Mal::Core::NS
   end
 
   def self.symbols
-    @symbols ||= Hash[@symbol_mapping.map {|key, value| [key, method(value)]}]
+    @symbols ||= Hash[@symbol_mapping.map {|key, value| [key, Types::NativeFunction[method(value)]]}]
   end
 
   symbol '+', :plus
@@ -231,7 +231,7 @@ module Mal::Core::NS
 
   symbol 'hash-map', :hash_map
   def self.hash_map(*args)
-    args.each_slice(2).to_h
+    Types::HashMap[args.each_slice(2).to_h]
   end
 
   symbol 'map?', :is_map
@@ -277,41 +277,70 @@ module Mal::Core::NS
 
   symbol 'time-ms', :time_ms
   def self.time_ms
-    raise NotImplementedError
+    (Time.now.to_f * 1000).to_i
   end
 
   symbol 'meta', :meta
-  def self.meta
-    raise NotImplementedError
+  def self.meta(form)
+    return nil unless form.respond_to?(:meta)
+    form.meta
   end
 
   symbol 'with-meta', :with_meta
-  def self.with_meta
-    raise NotImplementedError
+  def self.with_meta(form, meta)
+    form = form.dup
+    form.meta = meta
+    form
   end
 
   symbol 'fn?', :fn?
-  def self.fn?
-    raise NotImplementedError
+  def self.fn?(arg)
+    case
+      when arg.is_a?(Types::NativeFunction)
+        true
+      when arg.is_a?(Types::Function) && !arg.macro?
+        true
+      else
+        false
+    end
+  end
+
+  symbol 'macro?', :macro?
+  def self.macro?(arg)
+    return false unless arg.respond_to?(:macro?)
+    arg.macro?
   end
 
   symbol 'string?', :string?
-  def self.string?
-    raise NotImplementedError
+  def self.string?(arg)
+    arg.is_a?(String)
   end
 
   symbol 'number?', :number?
-  def self.number?
-    raise NotImplementedError
+  def self.number?(arg)
+    arg.is_a?(Numeric)
   end
 
   symbol 'seq', :seq
-  def self.seq
-    raise NotImplementedError
+  def self.seq(arg)
+    return nil if arg.nil? or arg.empty?
+
+    case arg
+      when Types::List
+        arg
+      when Types::Vector
+        Types::List[*arg]
+      when String
+        Types::List[*arg.chars]
+    end
   end
 
   symbol 'conj', :conj
-  def self.conj
-    raise NotImplementedError
+  def self.conj(seq, *els)
+    if seq.is_a?(Types::List)
+      Types::List[*els.reverse, *seq]
+    elsif seq.is_a?(Types::Vector)
+      Types::Vector[*seq, *els]
+    end
   end
 end
