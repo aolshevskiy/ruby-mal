@@ -270,4 +270,48 @@ module Mal::Core::NS
     Types::List[*map.values]
   end
 
+  symbol 'readline', :readline
+  def self.readline(prompt)
+    ::Readline.readline(prompt, true)
+  end
+
+  symbol 'time-ms', :time_ms
+  def self.time_ms
+    raise NotImplementedError
+  end
+
+  symbol 'meta', :meta
+  def self.meta
+    raise NotImplementedError
+  end
+
+  symbol 'with-meta', :with_meta
+  def self.with_meta
+    raise NotImplementedError
+  end
+
+  symbol 'fn?', :fn?
+  def self.fn?
+    raise NotImplementedError
+  end
+
+  symbol 'string?', :string?
+  def self.string?
+    raise NotImplementedError
+  end
+
+  symbol 'number?', :number?
+  def self.number?
+    raise NotImplementedError
+  end
+
+  symbol 'seq', :seq
+  def self.seq
+    raise NotImplementedError
+  end
+
+  symbol 'conj', :conj
+  def self.conj
+    raise NotImplementedError
+  end
 end

@@ -1,6 +1,11 @@
 require 'readline'
 
 module Mal
+  DIR = File.dirname(__FILE__)
+
+  def self.relative_path(*args)
+    File.join(DIR, *args)
+  end
 
   module Core; end
   module Types; end

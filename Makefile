@@ -89,7 +89,7 @@ DOCKERIZE =
 # Implementation specific settings
 #
 
-IMPLS = ruby
+IMPLS = ruby mal
 
 EXTENSION = .mal
 

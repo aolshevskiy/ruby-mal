@@ -41,6 +41,8 @@ module Mal
     def initialize
       super
 
+      set!('*host-language*', 'ruby')
+
       Core::NS.symbols.each do |key, proc|
         set!(key, proc)
       end

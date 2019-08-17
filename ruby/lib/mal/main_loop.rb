@@ -7,12 +7,14 @@ class Mal::MainLoop
 
   PROMPT = 'user> '
   def loop
-    init
+    load_file('init.mal')
 
     unless ARGV.empty?
       batch(*ARGV)
       return
     end
+
+    load_file('interactive.mal')
 
     Readline.mal_readline(PROMPT) do |line|
       puts rep(line)
@@ -45,11 +47,11 @@ class Mal::MainLoop
   end
 
   private
-  def init
-    mal_dir = File.join(File.dirname(__FILE__), '..')
-    init_script_path = File.join(mal_dir, 'init.mal')
-    init_script = File.read(init_script_path)
 
-    rep(init_script.strip)
+  def load_file(*file_parts)
+    script_path = Mal.relative_path(*file_parts)
+    contents = File.read(script_path)
+
+    rep("(do #{contents} nil)")
   end
 end
