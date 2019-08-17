@@ -1,3 +1,21 @@
 module Mal::Types
-  Function = Struct.new(:ast, :params, :env, :fn)
+  class Function
+    def initialize(ast, params, env, fn)
+      @ast = ast
+      @params = params
+      @env = env
+      @fn = fn
+      @macro = false
+    end
+
+    attr_reader :ast, :params, :env, :fn
+
+    def macro=(macro)
+      @macro = macro
+    end
+
+    def macro?
+      @macro
+    end
+  end
 end

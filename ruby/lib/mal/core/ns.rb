@@ -144,4 +144,23 @@ module Mal::Core::NS
   def self.concat(*lists)
     Types::List[*lists.flatten(1)]
   end
+
+  symbol 'nth', :nth
+  def self.nth(seq, index)
+    seq.fetch(index)
+  end
+
+  symbol 'first', :first
+  def self.first(seq)
+    return nil if !seq.respond_to?(:[]) || seq.empty?
+
+    seq[0]
+  end
+
+  symbol 'rest', :rest
+  def self.rest(seq)
+    return Types::List[] unless seq.respond_to?(:[])
+
+    Types::List[*seq[1..-1]]
+  end
 end

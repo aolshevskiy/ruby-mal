@@ -22,7 +22,14 @@ class Mal::Evaluator
       if !ast.is_a?(Types::List)
         return eval_ast(ast, env)
       end
-      if ast.is_a?(Types::List) && ast.empty?
+
+      ast = macroexpand(ast, env)
+
+      if !ast.is_a?(Types::List)
+        return eval_ast(ast, env)
+      end
+
+      if ast.empty?
         return ast
       end
 
@@ -33,6 +40,12 @@ class Mal::Evaluator
         when 'def!'
           key, value = rest
           return env.set!(key.name, eval(value, env))
+
+        when 'defmacro!'
+          key, value = rest
+          evaled_value = eval(value, env)
+          evaled_value.macro = true if evaled_value.is_a?(Types::Function)
+          return env.set!(key.name, evaled_value)
 
         when 'let*'
           env = Env.new(env)
@@ -76,6 +89,9 @@ class Mal::Evaluator
         when 'quasiquote'
           ast = quasiquote(rest[0])
 
+        when 'macroexpand'
+          return macroexpand(rest[0], env)
+
         else
           f, *args = eval_ast(ast, env)
           case f
@@ -90,6 +106,27 @@ class Mal::Evaluator
   end
 
   private
+
+  def macro_call?(ast, env)
+    unless ast.is_a?(Types::List) and ast[0].is_a?(Types::Symbol)
+      return false
+    end
+
+    begin
+      maybe_macro = env.get(ast[0].name)
+    rescue NameError
+      return false
+    end
+    maybe_macro.is_a?(Types::Function) && maybe_macro.macro?
+  end
+
+  def macroexpand(ast, env)
+    while macro_call?(ast, env)
+      macro = env.get(ast[0].name)
+      ast = macro.fn.call(*ast[1..-1])
+    end
+    ast
+  end
 
   def quasiquote(ast)
     if !pair?(ast)
