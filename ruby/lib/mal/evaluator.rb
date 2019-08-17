@@ -10,65 +10,70 @@ class Mal::Evaluator
   end
 
   def eval(ast, env)
+    loop do
+      if !ast.is_a?(Types::List)
+        return eval_ast(ast, env)
+      end
+      if ast.is_a?(Types::List) && ast.empty?
+        return ast
+      end
 
-    if !ast.is_a?(Types::List)
-      return eval_ast(ast, env)
-    end
-    if ast.is_a?(Types::List) && ast.empty?
-      return ast
-    end
+      first, *rest = ast
+      first_name = first.is_a?(Types::Symbol) ? first.name : nil
 
-    first, *rest = ast
-    first_name = first.is_a?(Types::Symbol) ? first.name : nil
+      case first_name
+        when 'def!'
+          key, value = rest
+          return env.set!(key.name, eval(value, env))
 
-    case first_name
-      when 'def!'
-        key, value = rest
-        return env.set!(key.name, eval(value, env))
+        when 'let*'
+          env = Env.new(env)
+          bindings, result_expr = rest
+          bindings.each_slice(2) do |key, value|
+            env.set!(key.name, eval(value, env))
+          end
 
-      when 'let*'
-        let_env = Env.new(env)
-        bindings, result_expr = rest
-        bindings.each_slice(2) do |key, value|
-          let_env.set!(key.name, eval(value, let_env))
-        end
+          ast = result_expr
 
-        return eval(result_expr, let_env)
+        when 'do'
+          rest[0..-2].each do |e|
+            eval(e, env)
+          end
 
-      when 'do'
-        result = nil
-        rest.each do |e|
-          result = eval(e, env)
-        end
-        return result
+          ast = ast[-1]
 
-      when 'if'
-        condition, truthy, falsy = rest
+        when 'if'
+          condition, truthy, falsy = rest
 
-        cond_result = eval(condition, env)
+          cond_result = eval(condition, env)
 
-        result = if !cond_result.nil? && cond_result != false
-          eval(truthy, env)
-        elsif not falsy.nil?
-          eval(falsy, env)
+          if cond_result
+            ast = truthy
+          else
+            ast = falsy
+          end
+
+        when 'fn*'
+          params, body = rest
+          func = Proc.new do |*exprs|
+            fn_env = Env.new(env, params, exprs)
+            eval(body, fn_env)
+          end
+
+          return Types::Function.new(body, params, env, func)
+
         else
-          nil
-        end
+          f, *args = eval_ast(ast, env)
+          case f
+            when Types::Function
+              ast = f.ast
+              env = Env.new(f.env, f.params, args)
+            else
+              return f.call(*args)
+          end
 
-        return result
 
-      when 'fn*'
-        binds, body = rest
-        result = Proc.new do |*exprs|
-          fn_env = Env.new(env, binds, exprs)
-          eval(body, fn_env)
-        end
-
-        return result
-
-      else
-        op, *args = eval_ast(ast, env)
-        return op.call(*args)
+      end
     end
   end
 

@@ -42,7 +42,7 @@ class Mal::Printer
         "(deref #{do_pr_str(ast.dereffed)})"
       when Types::Metadata
         "(with-meta #{do_pr_str(ast.marked)} #{do_pr_str(ast.metadata)})"
-      when Proc
+      when Types::Function
         "#<function>"
       else
         raise ArgumentError, "Unknown form: #{ast.inspect}"
