@@ -131,7 +131,6 @@ module Mal::Core::NS
 
   symbol 'swap!', :swap!
   def self.swap!(atom, fn, *fns)
-    fn = fn.fn if fn.is_a?(Types::Function)
     atom.value = fn.call(atom.value, *fns)
   end
 
@@ -163,4 +162,112 @@ module Mal::Core::NS
 
     Types::List[*seq[1..-1]]
   end
+
+  symbol 'throw', :throw
+  def self.throw(value)
+    raise Types::Exception[value]
+  end
+
+  symbol 'apply', :apply
+  def self.apply(fn, *args)
+    args.flatten!(1)
+    fn.call(*args)
+  end
+
+  symbol 'map', :map
+  def self.map(fn, seq)
+    Types::List[*seq.map {|e| fn.call(e)}]
+  end
+
+  symbol 'nil?', :is_nil
+  def self.is_nil(arg)
+    arg.nil?
+  end
+
+  symbol 'true?', :true?
+  def self.true?(arg)
+    arg == true
+  end
+
+  symbol 'false?', :false?
+  def self.false?(arg)
+    arg == false
+  end
+
+  symbol 'symbol', :symbol_sym
+  def self.symbol_sym(str)
+    Types::Symbol[str]
+  end
+
+  symbol 'symbol?', :symbol?
+  def self.symbol?(arg)
+    arg.is_a?(Types::Symbol)
+  end
+
+  symbol 'keyword', :keyword
+  def self.keyword(str)
+    str.to_sym
+  end
+
+  symbol 'keyword?', :keyword?
+  def self.keyword?(arg)
+    arg.is_a?(Symbol)
+  end
+
+  symbol 'vector', :vector
+  def self.vector(*els)
+    Types::Vector[*els]
+  end
+
+  symbol 'vector?', :vector?
+  def self.vector?(arg)
+    arg.is_a?(Types::Vector)
+  end
+
+  symbol 'sequential?', :sequential?
+  def self.sequential?(arg)
+    arg.is_a?(Types::List) or arg.is_a?(Types::Vector)
+  end
+
+  symbol 'hash-map', :hash_map
+  def self.hash_map(*args)
+    args.each_slice(2).to_h
+  end
+
+  symbol 'map?', :is_map
+  def self.is_map(arg)
+    arg.is_a?(Hash)
+  end
+
+  symbol 'assoc', :assoc
+  def self.assoc(map, *updates)
+    map.merge(updates.each_slice(2).to_h)
+  end
+
+  symbol 'dissoc', :dissoc
+  def self.dissoc(map, *to_remove)
+    map.reject {|k, _| to_remove.include? k}
+  end
+
+  symbol 'get', :get
+  def self.get(map, key)
+    return nil unless map.respond_to?(:[])
+    map[key]
+  end
+
+  symbol 'contains?', :contains?
+  def self.contains?(map, key)
+    map.has_key?(key)
+  end
+
+  symbol 'keys', :keys
+  def self.keys(map)
+    Types::List[*map.keys]
+  end
+
+  symbol 'vals', :vals
+  def self.vals(map)
+    Types::List[*map.values]
+  end
+
 end

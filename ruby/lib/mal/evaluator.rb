@@ -92,6 +92,19 @@ class Mal::Evaluator
         when 'macroexpand'
           return macroexpand(rest[0], env)
 
+        when 'try*'
+          begin
+            return eval(rest[0], env)
+          rescue StandardError => e
+            e = Types::Exception[e.message] unless e.is_a?(Types::Exception)
+            if rest.size == 1
+              return e
+            end
+            _, exc_sym, body = rest[1]
+            catch_env = Env.new(env, [exc_sym], [e])
+            return eval(body, catch_env)
+          end
+
         else
           f, *args = eval_ast(ast, env)
           case f
@@ -123,7 +136,7 @@ class Mal::Evaluator
   def macroexpand(ast, env)
     while macro_call?(ast, env)
       macro = env.get(ast[0].name)
-      ast = macro.fn.call(*ast[1..-1])
+      ast = macro.call(*ast[1..-1])
     end
     ast
   end

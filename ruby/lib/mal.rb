@@ -28,4 +28,5 @@ module Mal
   require 'mal/types/function'
   require 'mal/types/atom'
   require 'mal/types/deref'
+  require 'mal/types/exception'
 end

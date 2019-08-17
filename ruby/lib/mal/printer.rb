@@ -36,6 +36,8 @@ class Mal::Printer
         "#<function>"
       when Types::Atom
         "(atom #{ast.value})"
+      when Types::Exception
+        do_pr_str(ast.value)
       else
         raise ArgumentError, "Unknown form: #{ast.inspect}"
     end

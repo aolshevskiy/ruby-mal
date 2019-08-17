@@ -17,5 +17,9 @@ module Mal::Types
     def macro?
       @macro
     end
+
+    def call(*args)
+      @fn.call(*args)
+    end
   end
 end
