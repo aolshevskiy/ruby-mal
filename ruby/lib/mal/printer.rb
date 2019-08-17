@@ -38,12 +38,12 @@ class Mal::Printer
         "(unquote #{do_pr_str(ast.unquoted)})"
       when Types::SpliceUnquote
         "(splice-unquote #{do_pr_str(ast.unquoted)})"
-      when Types::Deref
-        "(deref #{do_pr_str(ast.dereffed)})"
       when Types::Metadata
         "(with-meta #{do_pr_str(ast.marked)} #{do_pr_str(ast.metadata)})"
-      when Types::Function
+      when Method, Types::Function
         "#<function>"
+      when Types::Atom
+        "(atom #{ast.value})"
       else
         raise ArgumentError, "Unknown form: #{ast.inspect}"
     end

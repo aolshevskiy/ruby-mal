@@ -9,6 +9,11 @@ class Mal::MainLoop
   def loop
     init
 
+    unless ARGV.empty?
+      batch(*ARGV)
+      return
+    end
+
     Readline.mal_readline(PROMPT) do |line|
       puts rep(line)
     rescue StandardError => e
@@ -17,6 +22,11 @@ class Mal::MainLoop
   end
 
   protected
+
+  def batch(mal_file, *args)
+    @evaluator.set_args(args)
+    rep(%{(load-file "#{mal_file}")})
+  end
 
   def read(raw_input)
     Read::Driver.read_str(raw_input)

@@ -19,6 +19,8 @@ module Mal::Read::Driver
     /x
 
   def self.tokenize(source_code)
-    source_code.scan(TOKEN_REGEX).map { |m| m[0] }.filter { |t| not t.empty? }
+    source_code.scan(TOKEN_REGEX).map {|m| m[0]}.
+      filter {|t| not t.empty?}.
+      filter {|t| t[0] != ';'}
   end
 end

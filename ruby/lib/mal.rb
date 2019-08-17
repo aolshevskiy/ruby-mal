@@ -24,7 +24,7 @@ module Mal
   require 'mal/types/quasiquote'
   require 'mal/types/unquote'
   require 'mal/types/splice_unquote'
-  require 'mal/types/deref'
   require 'mal/types/metadata'
   require 'mal/types/function'
+  require 'mal/types/atom'
 end

@@ -107,7 +107,7 @@ class Mal::Read::Reader
   def read_deref
     next_token
     dereffed_form = read_form
-    Types::Deref.new(dereffed_form)
+    Types::List[Types::Symbol.new('deref'), dereffed_form]
   end
 
   def read_metadata

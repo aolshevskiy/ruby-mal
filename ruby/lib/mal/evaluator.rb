@@ -1,8 +1,16 @@
 class Mal::Evaluator
   include Mal
 
+  ARGV_SYMBOL = '*ARGV*'
+
   def initialize
     @top_level = TopLevelEnv.new
+    @top_level.set!('eval', method(:top_eval))
+    @top_level.set!(ARGV_SYMBOL, Types::List[])
+  end
+
+  def set_args(args)
+    @top_level.set!(ARGV_SYMBOL, Types::List[*args])
   end
 
   def top_eval(ast)
